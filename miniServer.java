@@ -16,18 +16,13 @@ public class miniServer extends Thread{
 
     private Socket socket;
     private Main mainServer;
-    private boolean sts = false;
-    private String saying;
 
-    public miniServer(Socket socket,Main server){
+    public miniServer(Socket socket){
         this.socket = socket;
-        mainServer = server;
+
     }
 
-    public void alienOutput (String output){
-        sts = true;
-        saying = output;
-    }
+
 
     @Override
     public void run() {
@@ -43,12 +38,7 @@ public class miniServer extends Thread{
             while (true){
                 String input = in.readUTF();
                 System.out.println(input);
-                mainServer.sendMessage(input);
                 out.writeUTF("Message recieved by socket: " + input);
-                if(sts){
-                    out.writeUTF(saying);
-                    sts = false;
-                }
             }
         } catch (Exception e) {
             System.out.println("Someone left");

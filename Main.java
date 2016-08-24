@@ -4,53 +4,47 @@ import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 
-public class Main
+public class Main extends Thread
 {
-
-    private static ServerSocket serverSocket;
-    static ArrayList<miniServer> Collection = new ArrayList<miniServer>();
+    private ServerSocket serverSocket;
+    private ArrayList<miniServer> Collections = new ArrayList<miniServer>();
     public Main(int port) throws IOException
     {
         serverSocket = new ServerSocket(port);
         serverSocket.setSoTimeout(100000);
     }
 
-    public void sendMessage(String message){
-        for(int i = 0; i < Collection.size(); i++){
-            Collection.get(i).alienOutput(message);
+    public void run()
+    {
+        while(true)
+        {
+            try
+            {
+                System.out.println("Waiting for client on port " +
+                        serverSocket.getLocalPort() + "...");
+                Socket server = serverSocket.accept();
+                miniServer mini = new miniServer(server);
+                mini.start();
+                Collections.add(mini);
+            }catch(SocketTimeoutException s)
+            {
+                System.out.println("Socket timed out!");
+                break;
+            }catch(IOException e)
+            {
+                e.printStackTrace();
+                break;
+            }
         }
     }
     public static void main(String [] args)
     {
         int port = 102;
-
         try
         {
-            Main motherShip = new Main(port);
-            while(true)
-            {
-                try
-                {
-                    System.out.println("Waiting for client on port " +
-                            serverSocket.getLocalPort() + "...");
-                    Socket server = serverSocket.accept();
-                    //Collection.add(new miniServer(server));
-                    miniServer mini = new miniServer(server,motherShip);
-                    mini.start();
-                    Collection.add(mini);
-
-                }catch(SocketTimeoutException s)
-                {
-                    System.out.println("Socket timed out!");
-                    break;
-                }catch(IOException e)
-                {
-                    e.printStackTrace();
-                    break;
-                }
-            }
-
-        }catch(Exception e)
+            Thread t = new Main(port);
+            t.start();
+        }catch(IOException e)
         {
             e.printStackTrace();
         }
